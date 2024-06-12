@@ -1,6 +1,15 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
+import {
+  VALIDATOR_REQUIRE,
+  VALIDATOR_MINLENGTH,
+} from '../../shared/util/validators'
 
+import Input from '../../shared/components/FormElements/Input'
+import Button from '../../shared/components/FormElements/Button'
+import useForm from '../../shared/hooks/form'
+
+import './PlaceForm.css'
 const DUMMY_PLACES = [
   {
     id: 'p1',
@@ -31,13 +40,41 @@ const DUMMY_PLACES = [
 ]
 
 export default function UpdatePlace() {
+
+
   const placeId = useParams().placeId
   const place = DUMMY_PLACES.find((pl) => pl.id === placeId)
 
   if (!place) return <h2 className="center">Could not find place!</h2>
+
   return (
-    <>
-      <h2>{JSON.stringify(place)}</h2>
-    </>
+    <form className="place-form">
+      <Input
+        id="title"
+        element="input"
+        type="text"
+        label="Title"
+        validators={[VALIDATOR_REQUIRE()]}
+        errorText="Please enter a valid title."
+        onInput={() => {}}
+        value={place.title}
+        valid={true}
+      />
+      <Input
+        id="description"
+        element="input"
+        type="textarea"
+        label="Description"
+        validators={[VALIDATOR_REQUIRE()]}
+        errorText="Please enter a valid description (min 5 characters)."
+        onInput={() => {}}
+        value={place.description}
+        valid={true}
+      />
+
+      <Button type="submit" disabled>
+        Update Place
+      </Button>
+    </form>
   )
 }
