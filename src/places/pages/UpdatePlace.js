@@ -92,7 +92,7 @@ export default function UpdatePlace() {
       </div>
     )
   }
-  
+
   if (isLoading) {
     return (
       <div className="center">
