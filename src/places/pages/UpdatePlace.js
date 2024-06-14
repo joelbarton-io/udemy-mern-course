@@ -1,4 +1,4 @@
-import React, { isValidElement } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   VALIDATOR_REQUIRE,
@@ -7,6 +7,7 @@ import {
 
 import Input from '../../shared/components/FormElements/Input'
 import Button from '../../shared/components/FormElements/Button'
+import Card from '../../shared/components/UIElements/Card'
 import { useForm } from '../../shared/hooks/form'
 
 import './PlaceForm.css'
@@ -40,28 +41,67 @@ const DUMMY_PLACES = [
 ]
 
 export default function UpdatePlace() {
-  const placeId = useParams().placeId
-  const place = DUMMY_PLACES.find((pl) => pl.id === placeId)
-
-  const [formState, inputHandler] = useForm(
+  const [isLoading, setIsLoading] = useState(true)
+  const [formState, inputHandler, setFormData] = useForm(
     {
       title: {
-        value: place.title,
+        value: '',
         isValid: true,
       },
       description: {
-        value: place.description,
+        value: '',
         isValid: true,
       },
     },
     true
   )
 
+  const placeId = useParams().placeId
+  const place = DUMMY_PLACES.find((pl) => pl.id === placeId)
+
+  useEffect(() => {
+    if (place) {
+      setFormData(
+        {
+          title: {
+            value: place.title,
+            isValid: true,
+          },
+          description: {
+            value: place.description,
+            isValid: true,
+          },
+        },
+        true
+      )
+    }
+    setIsLoading(false)
+  }, [setFormData, place])
+
   const placeUpdateSubmitHandler = (event) => {
     event.preventDefault()
     console.log(formState.inputs)
   }
-  if (!place) return <h2 className="center">Could not find place!</h2>
+
+  if (!place) {
+    return (
+      <div className="center">
+        <Card>
+          <h2>Could not find place!</h2>
+        </Card>
+      </div>
+    )
+  }
+  
+  if (isLoading) {
+    return (
+      <div className="center">
+        <Card>
+          <h2>Loading...</h2>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
@@ -81,7 +121,7 @@ export default function UpdatePlace() {
         element="input"
         type="textarea"
         label="Description"
-        validators={[VALIDATOR_REQUIRE()]}
+        validators={[VALIDATOR_MINLENGTH()]}
         errorText="Please enter a valid description (min 5 characters)."
         onInput={inputHandler}
         initialValue={formState.inputs.description.value}
