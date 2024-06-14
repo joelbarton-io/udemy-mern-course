@@ -33,6 +33,7 @@ const NewPlace = () => {
     e.preventDefault()
     console.log('submitted form with data: ', formState.inputs)
   }
+
   return (
     <form className="place-form" onSubmit={placeSubmitHandler}>
       <Input
