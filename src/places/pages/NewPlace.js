@@ -1,4 +1,5 @@
 import React, { useContext } from 'react'
+import { useHistory } from 'react-router-dom'
 
 import Input from '../../shared/components/FormElements/Input'
 import Button from '../../shared/components/FormElements/Button'
@@ -37,6 +38,8 @@ const NewPlace = () => {
   const auth = useContext(AuthContext)
   const { isLoading, error, http, clearErrorHandler } = useHttpClient()
 
+  const history = useHistory()
+
   const placeSubmitHandler = async (e) => {
     e.preventDefault()
 
@@ -57,7 +60,7 @@ const NewPlace = () => {
 
     try {
       await http('http://localhost:5001/api/places', options)
-      // redirect user to new page
+      history.push('/')
     } catch (excepshun) {
       console.log({ excepshun })
     }
