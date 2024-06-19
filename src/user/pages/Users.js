@@ -18,7 +18,9 @@ const Users = () => {
         )
 
         setUsers(usersList)
-      } catch (excepshun) {}
+      } catch (excepshun) {
+        console.log(excepshun)
+      }
     }
 
     fetchAllUsers()

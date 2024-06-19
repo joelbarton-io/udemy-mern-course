@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { AuthContext } from '../../shared/components/context/auth-context'
+import { AuthContext } from '../../shared/context/auth-context'
 
 import {
   VALIDATOR_MINLENGTH,
@@ -82,11 +82,11 @@ export default function Auth(props) {
       }
 
       try {
-        const data = await http(
+        const { user, message } = await http(
           'http://localhost:5001/api/users/signup',
           signupOptions
         )
-        auth.login()
+        auth.login(user.id)
       } catch (excepshun) {
         console.error(excepshun.message)
       }
@@ -99,8 +99,11 @@ export default function Auth(props) {
         }),
       }
       try {
-        await http('http://localhost:5001/api/users/login', loginOptions)
-        auth.login()
+        const { user, message } = await http(
+          'http://localhost:5001/api/users/login',
+          loginOptions
+        )
+        auth.login(user.id)
       } catch (excepshun) {
         console.error(excepshun.message)
       }

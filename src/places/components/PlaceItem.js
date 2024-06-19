@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react'
-import { AuthContext } from '../../shared/components/context/auth-context'
+import { AuthContext } from '../../shared/context/auth-context'
 
 import Card from '../../shared/components/UIElements/Card'
 import Button from '../../shared/components/FormElements/Button'

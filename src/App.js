@@ -12,18 +12,21 @@ import UpdatePlace from './places/pages/UpdatePlace'
 import UserPlaces from './places/pages/UserPlaces'
 import MainNavigation from './shared/components/Navigation/MainNavigation'
 import Auth from './user/pages/Auth'
-import { AuthContext } from './shared/components/context/auth-context'
+import { AuthContext } from './shared/context/auth-context'
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loggedInUserId, setLoggedInUserId] = useState(null)
 
-  const login = useCallback(() => {
-    console.log('logging in')
+  const login = useCallback((userid) => {
+    console.log(`logging in user with id: ${userid}`)
+    setLoggedInUserId(userid)
     setIsLoggedIn(true)
   }, [])
 
   const logout = useCallback(() => {
     console.log('logging out')
+    setLoggedInUserId(null)
     setIsLoggedIn(false)
   }, [])
 
@@ -61,7 +64,9 @@ const App = () => {
     )
   }
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, userId: loggedInUserId, login, logout }}
+    >
       <Router>
         <MainNavigation />
         <main>{routes}</main>
