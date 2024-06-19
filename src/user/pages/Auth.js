@@ -6,11 +6,13 @@ import {
   VALIDATOR_EMAIL,
   VALIDATOR_REQUIRE,
 } from '../../shared/util/validators'
+
 import { useForm } from '../../shared/hooks/form'
+import { useHttpClient } from '../../shared/hooks/http'
+
 import Card from '../../shared/components/UIElements/Card'
 import Input from '../../shared/components/FormElements/Input'
 import Button from '../../shared/components/FormElements/Button'
-
 import ErrorModal from '../../shared/components/UIElements/ErrorModal'
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
 import './Auth.css'
@@ -18,8 +20,6 @@ import './Auth.css'
 export default function Auth(props) {
   const auth = useContext(AuthContext)
   const [isSignupMode, setIsNewUser] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
 
   const [formState, inputHandler, setFormData] = useForm(
     {
@@ -34,6 +34,8 @@ export default function Auth(props) {
     },
     false
   )
+
+  const { http, clearErrorHandler, isLoading, error } = useHttpClient()
 
   const toggleSignupLogin = () => {
     if (isSignupMode) {
@@ -61,79 +63,51 @@ export default function Auth(props) {
 
   const authSubmitHandler = async (e) => {
     e.preventDefault()
-    setIsLoading(true)
 
     if (isSignupMode) {
       try {
-        const signupResponse = await fetch(
+        const signupData = await http(
+          'POST',
           'http://localhost:5001/api/users/signup',
           {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              name: formState.inputs.name.value,
-              email: formState.inputs.email.value,
-              password: formState.inputs.password.value,
-            }),
-          }
+            'Content-Type': 'application/json',
+          },
+          JSON.stringify({
+            name: formState.inputs.name.value,
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          })
         )
 
-        const data = await signupResponse.json()
-
-        if (!data.ok) {
-          throw new Error(data.message)
-        }
-        console.log({ data })
-        setIsLoading(false)
+        console.log({ signupData })
         auth.login()
-      } catch (err) {
-        console.log(err)
-        setIsLoading(false)
-        setError(err.message || 'Something went wrong, please try again')
-      }
+      } catch (err) {}
     } else {
       try {
         const { email, password } = formState.inputs
 
-        const response = await fetch('http://localhost:5001/api/users/login', {
-          method: 'POST',
-          headers: {
+        const loginData = await http(
+          'POST',
+          'http://localhost:5001/api/users/login',
+          {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
+          JSON.stringify({
             email: email.value,
             password: password.value,
-          }),
-        })
-
-        const data = await response.json()
-
-        if (!data.ok) {
-          throw new Error(
-            data.message ||
-              'generic error, no "message" property on response.data object'
-          )
-        }
-        auth.login()
-      } catch (excepshun) {
-        setError(
-          excepshun.message ||
-            'Something went wrong with login, please try again'
+          })
         )
-        setIsLoading(false)
-      }
+
+        console.log({ loginData })
+        auth.login()
+      } catch (excepshun) {}
     }
   }
 
-  const errorHandler = () => {
-    setError(null)
-  }
+
   return (
     <>
-      <ErrorModal error={error} onClear={errorHandler} />
-
+      {error && <ErrorModal error={error} onClear={clearErrorHandler} />}
       <Card className="authentication">
         {isLoading && <LoadingSpinner asOverlay />}
         <h2>{isSignupMode ? 'Signup Required' : 'Login Required'}</h2>
