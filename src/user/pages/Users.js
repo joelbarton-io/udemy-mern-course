@@ -1,37 +1,24 @@
 import React, { useEffect, useState } from 'react'
 
+import { useHttpClient } from '../../shared/hooks/http'
+
 import UsersList from '../components/UsersList'
 import ErrorModal from '../../shared/components/UIElements/ErrorModal'
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
 
 const Users = () => {
   const [users, setUsers] = useState(null)
-  const [isLoading, setisLoading] = useState(false)
-  const [error, setError] = useState(null)
-
-  const errorHandler = () => {
-    setError(null)
-  }
+  const { http, error, isLoading, clearErrorHandler } = useHttpClient()
 
   useEffect(() => {
     const fetchAllUsers = async () => {
-      setisLoading(true)
       try {
-        const usersResponse = await fetch('http://localhost:5001/api/users')
+        const { users: usersList } = await http(
+          'http://localhost:5001/api/users'
+        )
 
-        if (!usersResponse.ok) {
-          throw new Error(
-            usersResponse.message ||
-              'Something went wrong when attempting to fetch all users'
-          )
-        }
-
-        const { users: usersArray } = await usersResponse.json()
-        setUsers(usersArray)
-      } catch (excepshun) {
-        setError(excepshun.message || 'GenericErrorMessage')
-      }
-      setisLoading(false)
+        setUsers(usersList)
+      } catch (excepshun) {}
     }
 
     fetchAllUsers()
@@ -39,7 +26,7 @@ const Users = () => {
 
   return (
     <>
-      {<ErrorModal error={error} onClear={errorHandler} />}
+      {<ErrorModal error={error} onClear={clearErrorHandler} />}
       {isLoading && (
         <div className="center">
           <LoadingSpinner asOverlay />
