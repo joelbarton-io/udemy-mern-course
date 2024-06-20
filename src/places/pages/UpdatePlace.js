@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useEffect, useState, useContext } from 'react'
+import { useParams, useHistory } from 'react-router-dom'
+
 import {
   VALIDATOR_REQUIRE,
   VALIDATOR_MINLENGTH,
@@ -8,40 +9,16 @@ import {
 import Input from '../../shared/components/FormElements/Input'
 import Button from '../../shared/components/FormElements/Button'
 import Card from '../../shared/components/UIElements/Card'
-import { useForm } from '../../shared/hooks/form'
+import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
+import ErrorModal from '../../shared/components/UIElements/ErrorModal'
 
+import { useForm } from '../../shared/hooks/form'
+import { useHttpClient } from '../../shared/hooks/http'
+import { AuthContext } from '../../shared/context/auth-context'
 import './PlaceForm.css'
-const DUMMY_PLACES = [
-  {
-    id: 'p1',
-    title: 'Empire State Building',
-    description: 'One of the most famous sky scrapers in the world!',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/NYC_Empire_State_Building.jpg/640px-NYC_Empire_State_Building.jpg',
-    address: '20 W 34th St, New York, NY 10001',
-    location: {
-      lat: 40.7484405,
-      lng: -73.9878584,
-    },
-    creator: 'u1',
-  },
-  {
-    id: 'p2',
-    title: 'Empire State Building',
-    description: 'One of the most famous sky scrapers in the world!',
-    imageUrl:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/NYC_Empire_State_Building.jpg/640px-NYC_Empire_State_Building.jpg',
-    address: '20 W 34th St, New York, NY 10001',
-    location: {
-      lat: 40.7484405,
-      lng: -73.9878584,
-    },
-    creator: 'u2',
-  },
-]
 
 export default function UpdatePlace() {
-  const [isLoading, setIsLoading] = useState(true)
+  const auth = useContext(AuthContext)
   const [formState, inputHandler, setFormData] = useForm(
     {
       title: {
@@ -56,34 +33,61 @@ export default function UpdatePlace() {
     true
   )
 
+  const { isLoading, error, http, clearErrorHandler } = useHttpClient()
+  const [loadedPlace, setLoadedPlace] = useState(null)
+
   const placeId = useParams().placeId
-  const place = DUMMY_PLACES.find((pl) => pl.id === placeId)
+  const history = useHistory()
 
   useEffect(() => {
-    if (place) {
-      setFormData(
-        {
-          title: {
-            value: place.title,
-            isValid: true,
-          },
-          description: {
-            value: place.description,
-            isValid: true,
-          },
-        },
-        true
-      )
-    }
-    setIsLoading(false)
-  }, [setFormData, place])
+    const getPlaceToUpdate = async () => {
+      try {
+        const { place } = await http(
+          `http://localhost:5001/api/places/${placeId}`
+        )
 
-  const placeUpdateSubmitHandler = (event) => {
+        setLoadedPlace(place)
+        setFormData(
+          {
+            title: {
+              value: place.title,
+              isValid: true,
+            },
+            description: {
+              value: place.description,
+              isValid: true,
+            },
+          },
+          true
+        )
+      } catch (excepshun) {}
+    }
+
+    getPlaceToUpdate()
+  }, [placeId])
+
+  const placeUpdateSubmitHandler = async (event) => {
     event.preventDefault()
-    console.log(formState.inputs)
+
+    try {
+      const { place } = await http(
+        `http://localhost:5001/api/places/${placeId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title: formState.inputs.title.value,
+            description: formState.inputs.description.value,
+          }),
+        }
+      )
+      history.push(`/${auth.userId}/places`)
+    } catch (excepshun) {}
   }
 
-  if (!place) {
+  if (!loadedPlace && !error) {
     return (
       <div className="center">
         <Card>
@@ -96,41 +100,44 @@ export default function UpdatePlace() {
   if (isLoading) {
     return (
       <div className="center">
-        <Card>
-          <h2>Loading...</h2>
-        </Card>
+        <LoadingSpinner />
       </div>
     )
   }
 
   return (
-    <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
-      <Input
-        id="title"
-        element="input"
-        type="text"
-        label="Title"
-        validators={[VALIDATOR_REQUIRE()]}
-        errorText="Please enter a valid title."
-        onInput={inputHandler}
-        initialValue={formState.inputs.title.value}
-        initialValid={formState.inputs.title.isValid}
-      />
-      <Input
-        id="description"
-        element="input"
-        type="textarea"
-        label="Description"
-        validators={[VALIDATOR_MINLENGTH()]}
-        errorText="Please enter a valid description (min 5 characters)."
-        onInput={inputHandler}
-        initialValue={formState.inputs.description.value}
-        initialValid={formState.inputs.description.isValid}
-      />
+    <>
+      <ErrorModal error={error} onClear={clearErrorHandler} />
+      {!isLoading && loadedPlace && (
+        <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
+          <Input
+            id="title"
+            element="input"
+            type="text"
+            label="Title"
+            validators={[VALIDATOR_REQUIRE()]}
+            errorText="Please enter a valid title."
+            onInput={inputHandler}
+            initialValue={loadedPlace.title}
+            initialValid={true}
+          />
+          <Input
+            id="description"
+            element="input"
+            type="textarea"
+            label="Description"
+            validators={[VALIDATOR_MINLENGTH(5)]}
+            errorText="Please enter a valid description (min 5 characters)."
+            onInput={inputHandler}
+            initialValue={loadedPlace.description}
+            initialValid={true}
+          />
 
-      <Button type="submit" disabled={!formState.isValid}>
-        Update Place
-      </Button>
-    </form>
+          <Button type="submit" disabled={!formState.isValid}>
+            Update Place
+          </Button>
+        </form>
+      )}
+    </>
   )
 }
