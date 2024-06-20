@@ -173,8 +173,7 @@ export default function Auth(props) {
             errorText="Please enter a valid password (at least 6 characters)."
             onInput={inputHandler}
           />
-          <Button type="submit">
-            {/* disabled={!formState.isValid} */}
+          <Button type="submit" disabled={!formState.isValid}>
             {isSignupMode ? 'Signup' : 'Login'}
           </Button>
           <Button inverse type="button" onClick={toggleSignupLogin}>
