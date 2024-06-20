@@ -5,6 +5,7 @@ import Input from '../../shared/components/FormElements/Input'
 import Button from '../../shared/components/FormElements/Button'
 import ErrorModal from '../../shared/components/UIElements/ErrorModal'
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
+import ImageUpload from '../../shared/components/FormElements/ImageUpload'
 
 import { useForm } from '../../shared/hooks/form'
 import { useHttpClient } from '../../shared/hooks/http'
@@ -28,7 +29,11 @@ const NewPlace = () => {
         isValid: false,
       },
       address: {
-        valuke: '',
+        value: '',
+        isValid: false,
+      },
+      image: {
+        value: null,
         isValid: false,
       },
     },
@@ -43,23 +48,21 @@ const NewPlace = () => {
   const placeSubmitHandler = async (e) => {
     e.preventDefault()
 
-    const { title, description, address } = formState.inputs
+    console.log({ formInputs: formState.inputs })
+    const { title, description, address, image } = formState.inputs
 
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        title: title.value,
-        description: description.value,
-        address: address.value,
-        creator: auth.userId,
-      }),
-    }
+    const fd = new FormData()
+    fd.append('title', title.value)
+    fd.append('description', description.value)
+    fd.append('address', address.value)
+    fd.append('creator', auth.userId)
+    fd.append('image', image.value)
 
     try {
-      await http('http://localhost:5001/api/places', options)
+      await http('http://localhost:5001/api/places', {
+        method: 'POST',
+        body: fd,
+      })
       history.push('/')
     } catch (excepshun) {
       console.log({ excepshun })
@@ -83,6 +86,12 @@ const NewPlace = () => {
           validators={[VALIDATOR_REQUIRE()]}
           errorText="Please enter a valid title."
           onInput={inputHandler}
+        />
+        <ImageUpload
+          id="image"
+          onInput={inputHandler}
+          center
+          errorText="Please provide an image"
         />
         <Input
           id="description"

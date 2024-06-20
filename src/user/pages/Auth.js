@@ -83,18 +83,17 @@ export default function Auth(props) {
     const { email, password, name, image } = formState.inputs
 
     if (isSignupMode) {
-      const signupOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.value,
-          email: email.value,
-          password: password.value,
-        }),
-      }
-
+      //   const signupOptions = {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify({
+      //       name: name.value,
+      //       email: email.value,
+      //       password: password.value,
+      //     }),
+      //   }
       try {
         const fd = new FormData()
         fd.append('name', name.value)
@@ -111,20 +110,19 @@ export default function Auth(props) {
         console.error(excepshun.message)
       }
     } else {
-      const loginOptions = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email.value,
-          password: password.value,
-        }),
-      }
       try {
         const { user, message } = await http(
           'http://localhost:5001/api/users/login',
-          loginOptions
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: email.value,
+              password: password.value,
+            }),
+          }
         )
         auth.login(user.id)
       } catch (excepshun) {
@@ -142,19 +140,25 @@ export default function Auth(props) {
         <hr />
         <form onSubmit={authSubmitHandler}>
           {isSignupMode && (
-            <Input
-              id="name"
-              element="input"
-              type="text"
-              label="Name"
-              validators={[VALIDATOR_REQUIRE()]}
-              errorText="Please enter a valid name."
-              onInput={inputHandler}
-            />
+            <>
+              <Input
+                id="name"
+                element="input"
+                type="text"
+                label="Name"
+                validators={[VALIDATOR_REQUIRE()]}
+                errorText="Please enter a valid name."
+                onInput={inputHandler}
+              />
+              <ImageUpload
+                id="image"
+                onInput={inputHandler}
+                center
+                errorText="Please provide an image"
+              />
+            </>
           )}
-          {isSignupMode && (
-            <ImageUpload id="image" onInput={inputHandler} center />
-          )}
+
           <Input
             id="email"
             element="input"
