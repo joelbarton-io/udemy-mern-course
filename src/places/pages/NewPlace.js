@@ -48,7 +48,6 @@ const NewPlace = () => {
   const placeSubmitHandler = async (e) => {
     e.preventDefault()
 
-    console.log({ formInputs: formState.inputs })
     const { title, description, address, image } = formState.inputs
 
     const fd = new FormData()
@@ -62,6 +61,9 @@ const NewPlace = () => {
       await http('http://localhost:5001/api/places', {
         method: 'POST',
         body: fd,
+        headers: {
+          Authorization: 'Bearer ' + auth.token,
+        },
       })
       history.push('/')
     } catch (excepshun) {

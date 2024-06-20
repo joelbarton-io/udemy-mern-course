@@ -57,7 +57,6 @@ export default function Auth(props) {
         tempFormData,
         formState.inputs.email.isValid && formState.inputs.password.isValid
       )
-      console.log({ formValidity: formState })
     } else {
       setFormData(
         {
@@ -66,10 +65,6 @@ export default function Auth(props) {
             value: '',
             isValid: false,
           },
-          //   image: {
-          //     value: null,
-          //     isValid: false,
-          //   },
         },
         false
       )
@@ -82,52 +77,39 @@ export default function Auth(props) {
     e.preventDefault()
     const { email, password, name, image } = formState.inputs
 
-    if (isSignupMode) {
-      //   const signupOptions = {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify({
-      //       name: name.value,
-      //       email: email.value,
-      //       password: password.value,
-      //     }),
-      //   }
-      try {
-        const fd = new FormData()
-        fd.append('name', name.value)
-        fd.append('email', email.value)
-        fd.append('password', password.value)
-        fd.append('image', image.value)
+    const signupHandler = async () => {
+      const fd = new FormData()
+      fd.append('name', name.value)
+      fd.append('email', email.value)
+      fd.append('password', password.value)
+      fd.append('image', image.value)
 
-        const { user, message } = await http(
-          'http://localhost:5001/api/users/signup',
-          { method: 'POST', body: fd }
-        )
-        auth.login(user.id)
-      } catch (excepshun) {
-        console.error(excepshun.message)
-      }
-    } else {
-      try {
-        const { user, message } = await http(
-          'http://localhost:5001/api/users/login',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: email.value,
-              password: password.value,
-            }),
-          }
-        )
-        auth.login(user.id)
-      } catch (excepshun) {
-        console.error(excepshun.message)
-      }
+      return await http('http://localhost:5001/api/users/signup', {
+        method: 'POST',
+        body: fd,
+      })
+    }
+    const loginHandler = async () => {
+      return await http('http://localhost:5001/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email.value,
+          password: password.value,
+        }),
+      })
+    }
+
+    try {
+      const { userid, email, token } = isSignupMode
+        ? await signupHandler()
+        : await loginHandler()
+
+      auth.login(userid, token)
+    } catch (error) {
+      console.error(error.message)
     }
   }
 
