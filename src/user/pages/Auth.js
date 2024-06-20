@@ -40,12 +40,24 @@ export default function Auth(props) {
 
   const toggleSignupLogin = () => {
     if (isSignupMode) {
-      const tempFormData = { ...formState.inputs, image: undefined }
-      delete tempFormData.name
+      const tempFormData = {
+        ...formState.inputs,
+        image: undefined,
+        name: undefined,
+        // image: {
+        //   value: null,
+        //   isValid: false,
+        // },
+        // name: {
+        //   value: '',
+        //   isValid: false,
+        // },
+      }
       setFormData(
         tempFormData,
         formState.inputs.email.isValid && formState.inputs.password.isValid
       )
+      console.log({ formValidity: formState })
     } else {
       setFormData(
         {
@@ -54,10 +66,10 @@ export default function Auth(props) {
             value: '',
             isValid: false,
           },
-          image: {
-            value: null,
-            isValid: false,
-          },
+          //   image: {
+          //     value: null,
+          //     isValid: false,
+          //   },
         },
         false
       )
@@ -89,6 +101,7 @@ export default function Auth(props) {
         fd.append('email', email.value)
         fd.append('password', password.value)
         fd.append('image', image.value)
+
         const { user, message } = await http(
           'http://localhost:5001/api/users/signup',
           { method: 'POST', body: fd }
@@ -160,7 +173,8 @@ export default function Auth(props) {
             errorText="Please enter a valid password (at least 6 characters)."
             onInput={inputHandler}
           />
-          <Button type="submit" disabled={!formState.isValid}>
+          <Button type="submit">
+            {/* disabled={!formState.isValid} */}
             {isSignupMode ? 'Signup' : 'Login'}
           </Button>
           <Button inverse type="button" onClick={toggleSignupLogin}>
