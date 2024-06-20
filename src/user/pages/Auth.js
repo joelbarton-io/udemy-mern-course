@@ -15,6 +15,7 @@ import Input from '../../shared/components/FormElements/Input'
 import Button from '../../shared/components/FormElements/Button'
 import ErrorModal from '../../shared/components/UIElements/ErrorModal'
 import LoadingSpinner from '../../shared/components/UIElements/LoadingSpinner'
+import ImageUpload from '../../shared/components/FormElements/ImageUpload'
 import './Auth.css'
 
 export default function Auth(props) {
@@ -39,7 +40,7 @@ export default function Auth(props) {
 
   const toggleSignupLogin = () => {
     if (isSignupMode) {
-      const tempFormData = { ...formState.inputs }
+      const tempFormData = { ...formState.inputs, image: undefined }
       delete tempFormData.name
       setFormData(
         tempFormData,
@@ -53,6 +54,10 @@ export default function Auth(props) {
             value: '',
             isValid: false,
           },
+          image: {
+            value: null,
+            isValid: false,
+          },
         },
         false
       )
@@ -63,17 +68,14 @@ export default function Auth(props) {
 
   const authSubmitHandler = async (e) => {
     e.preventDefault()
-    const { email, password, name } = formState.inputs
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
+    const { email, password, name, image } = formState.inputs
 
     if (isSignupMode) {
       const signupOptions = {
-        ...options,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           name: name.value,
           email: email.value,
@@ -82,9 +84,14 @@ export default function Auth(props) {
       }
 
       try {
+        const fd = new FormData()
+        fd.append('name', name.value)
+        fd.append('email', email.value)
+        fd.append('password', password.value)
+        fd.append('image', image.value)
         const { user, message } = await http(
           'http://localhost:5001/api/users/signup',
-          signupOptions
+          { method: 'POST', body: fd }
         )
         auth.login(user.id)
       } catch (excepshun) {
@@ -92,7 +99,10 @@ export default function Auth(props) {
       }
     } else {
       const loginOptions = {
-        ...options,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           email: email.value,
           password: password.value,
@@ -128,6 +138,9 @@ export default function Auth(props) {
               errorText="Please enter a valid name."
               onInput={inputHandler}
             />
+          )}
+          {isSignupMode && (
+            <ImageUpload id="image" onInput={inputHandler} center />
           )}
           <Input
             id="email"
