@@ -76,6 +76,7 @@ export default function UpdatePlace() {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + auth.token,
           },
           body: JSON.stringify({
             title: formState.inputs.title.value,

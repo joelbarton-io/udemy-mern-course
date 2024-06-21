@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React from 'react'
 import {
   BrowserRouter as Router,
   Route,
@@ -13,22 +13,10 @@ import UserPlaces from './places/pages/UserPlaces'
 import MainNavigation from './shared/components/Navigation/MainNavigation'
 import Auth from './user/pages/Auth'
 import { AuthContext } from './shared/context/auth-context'
+import { useAuth } from './shared/hooks/auth'
 
 const App = () => {
-  const [token, setToken] = useState(false)
-  const [loggedinUserid, setLoggedinUserid] = useState(null)
-
-  const login = useCallback((userid, token) => {
-    console.log(`logging in user with id: ${userid}`)
-    setLoggedinUserid(userid)
-    setToken(token)
-  }, [])
-
-  const logout = useCallback(() => {
-    console.log('logging out')
-    setLoggedinUserid(null)
-    setToken(null)
-  }, [])
+  const { token, loggedinUserid, login, logout } = useAuth()
 
   let routes
 

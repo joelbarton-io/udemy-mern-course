@@ -54,7 +54,7 @@ const NewPlace = () => {
     fd.append('title', title.value)
     fd.append('description', description.value)
     fd.append('address', address.value)
-    fd.append('creator', auth.userId)
+    // fd.append('creator', auth.userId)
     fd.append('image', image.value)
 
     try {

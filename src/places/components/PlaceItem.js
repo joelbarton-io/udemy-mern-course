@@ -29,10 +29,16 @@ const PlaceItem = (props) => {
     try {
       await http(`http://localhost:5001/api/places/${props.id}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: 'Bearer ' + auth.token,
+        },
       })
       props.onDelete(props.id)
-    } catch (excepshun) {}
+    } catch (excepshun) {
+        
+    }
   }
+
   return (
     <React.Fragment>
       <ErrorModal error={error} onClear={clearErrorHandler} />
