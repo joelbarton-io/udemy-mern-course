@@ -84,13 +84,13 @@ export default function Auth(props) {
       fd.append('password', password.value)
       fd.append('image', image.value)
 
-      return await http('http://localhost:5001/api/users/signup', {
+      return await http(process.env.REACT_APP_BACKEND_URL + '/users/signup', {
         method: 'POST',
         body: fd,
       })
     }
     const loginHandler = async () => {
-      return await http('http://localhost:5001/api/users/login', {
+      return await http(process.env.REACT_APP_BACKEND_URL + '/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

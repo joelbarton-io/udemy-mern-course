@@ -14,7 +14,7 @@ const Users = () => {
     const fetchAllUsers = async () => {
       try {
         const { users: usersList } = await http(
-          'http://localhost:5001/api/users'
+          process.env.REACT_APP_BACKEND_URL + '/users'
         )
 
         setUsers(usersList)

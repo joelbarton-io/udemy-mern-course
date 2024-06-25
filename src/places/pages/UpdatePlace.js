@@ -43,7 +43,7 @@ export default function UpdatePlace() {
     const getPlaceToUpdate = async () => {
       try {
         const { place } = await http(
-          `http://localhost:5001/api/places/${placeId}`
+          process.env.REACT_APP_BACKEND_URL + `/places/${placeId}`
         )
 
         setLoadedPlace(place)
@@ -71,7 +71,7 @@ export default function UpdatePlace() {
 
     try {
       const { place } = await http(
-        `http://localhost:5001/api/places/${placeId}`,
+        process.env.REACT_APP_BACKEND_URL + `/places/${placeId}`,
         {
           method: 'PATCH',
           headers: {

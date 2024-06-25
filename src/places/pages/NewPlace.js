@@ -58,7 +58,7 @@ const NewPlace = () => {
     fd.append('image', image.value)
 
     try {
-      await http('http://localhost:5001/api/places', {
+      await http(process.env.REACT_APP_BACKEND_URL + '/places', {
         method: 'POST',
         body: fd,
         headers: {
